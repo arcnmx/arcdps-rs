@@ -10,7 +10,7 @@ keywords = ["arcdps", "guild-wars-2", "ffi", "addon", "framework"]
 license = "MIT"
 
 [dependencies]
-arcdps_codegen = { path = "../arcdps_codegen" }
+arcdps_codegen = { path = "../arcdps_codegen", optional = true }
 arcdps-imgui = { version = "0.8.0", features = ["tables-api"] }
 bitflags = "2.8.0"
 chrono = { version = "0.4.24", optional = true }
@@ -29,8 +29,9 @@ windows = { version = "0.60.0", features = [
 ] }
 
 [features]
-default = ["unwind"]
-unwind = ["arcdps_codegen/unwind"]
-extras = ["arcdps_codegen/extras", "chrono"]
+default = ["unwind", "export"]
+export = ["dep:arcdps_codegen"]
+unwind = ["arcdps_codegen?/unwind"]
+extras = ["arcdps_codegen?/extras", "chrono"]
 serde = ["dep:serde", "evtc/serde", "chrono/serde"]
 strum = ["dep:strum", "evtc/strum"]
