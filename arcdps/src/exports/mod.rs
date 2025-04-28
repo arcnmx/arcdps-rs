@@ -378,13 +378,16 @@ pub enum AddExtensionResult {
 /// Requests to free a loaded extension (plugin/addon).
 ///
 /// ArcDPS will call `get_release_addr` and its returned function.
-/// Upon returning from [`free_extension`] there will be no more pending callbacks.
+/// Upon returning from [`remove_extension`] there will be no more pending callbacks.
 /// However, the caller must ensure to callbacks are executing before freeing.
 /// Returns the [`HMODULE`] handle of the module if the extension was found.
 ///
-/// This uses version 2 (`freeextension2`) of the extension API.
+/// This uses version 2 (`removeextension2`) of the extension API.
 #[inline]
-pub fn free_extension(sig: u32) -> Option<HMODULE> {
+pub fn remove_extension(sig: u32) -> Option<HMODULE> {
     let handle = unsafe { raw::free_extension(sig) };
     (!handle.is_invalid()).then_some(handle)
 }
+
+#[deprecated = "renamed, see remove_extension"]
+pub use remove_extension as free_extension;

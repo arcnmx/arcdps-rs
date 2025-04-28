@@ -5,7 +5,7 @@ use crate::{
         has_e3_log_file, has_e8_log_window, log_to_file, log_to_window,
         raw::{
             Export0, Export10, Export3, Export5, Export6, Export7, Export8, Export9,
-            ExportAddExtension, ExportFreeExtension, ExportListExtension,
+            ExportAddExtension, ExportRemoveExtension, ExportListExtension,
         },
     },
     imgui,
@@ -68,8 +68,8 @@ pub struct ArcGlobals {
     /// Add extension export.
     pub add_extension: Option<ExportAddExtension>,
 
-    /// Free extension export.
-    pub free_extension: Option<ExportFreeExtension>,
+    /// Remove extension export.
+    pub remove_extension: Option<ExportRemoveExtension>,
 
     /// List extension export.
     pub list_extension: Option<ExportListExtension>,
@@ -91,7 +91,7 @@ impl ArcGlobals {
             e9: transmute(exported_proc(handle, "e9\0")),
             e10: transmute(exported_proc(handle, "e10\0")),
             add_extension: transmute(exported_proc(handle, "addextension2\0")),
-            free_extension: transmute(exported_proc(handle, "freeextension2\0")),
+            remove_extension: transmute(exported_proc(handle, "removeextension2\0")),
             list_extension: transmute(exported_proc(handle, "listextension\0")),
         }
     }

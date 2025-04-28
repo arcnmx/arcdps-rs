@@ -109,22 +109,28 @@ pub unsafe fn add_extension(handle: HMODULE) -> u32 {
         .expect("failed to find arc export addextension2")(handle)
 }
 
-/// Signature of the `freeextension2` export. See [`free_extension`] for details.
-pub type ExportFreeExtension = unsafe extern "C" fn(sig: u32) -> HMODULE;
+/// Signature of the `removeextension2` export. See [`remove_extension`] for details.
+pub type ExportRemoveExtension = unsafe extern "C" fn(sig: u32) -> HMODULE;
+
+#[deprecated = "renamed, see remove_extension"]
+pub use self::{
+	ExportRemoveExtension as ExportFreeExtension,
+	remove_extension as free_extension,
+};
 
 /// Requests to free a loaded extension (plugin/addon).
 ///
 /// ArcDPS will call `get_release_addr` and its returned function.
-/// Upon returning from [`free_extension`] there will be no more pending callbacks.
+/// Upon returning from [`remove_extension`] there will be no more pending callbacks.
 /// However, the caller must ensure no callbacks are executing before freeing.
 /// Returns `0` if extension was not found or [`HMODULE`] handle of the module otherwise.
 ///
-/// This uses version 2 (`freeextension2`) of the extension API.
+/// This uses version 2 (`removeextension2`) of the extension API.
 #[inline]
-pub unsafe fn free_extension(sig: u32) -> HMODULE {
+pub unsafe fn remove_extension(sig: u32) -> HMODULE {
     ArcGlobals::get()
-        .free_extension
-        .expect("failed to find arc export freeextension2")(sig)
+        .remove_extension
+        .expect("failed to find arc export removeextension2")(sig)
 }
 
 /// Signature of the `listextension` export. See [`list_extension`] for details.

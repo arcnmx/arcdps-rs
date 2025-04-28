@@ -54,11 +54,14 @@ pub fn has_add_extension() -> bool {
     ArcGlobals::get().add_extension.is_some()
 }
 
-/// Checks whether export `freeextension2` was found.
+/// Checks whether export `removeextension2` was found.
 #[inline]
-pub fn has_free_extension() -> bool {
-    ArcGlobals::get().free_extension.is_some()
+pub fn has_remove_extension() -> bool {
+    ArcGlobals::get().remove_extension.is_some()
 }
+
+#[deprecated = "renamed, see has_remove_extension"]
+pub use has_remove_extension as has_free_extension;
 
 /// Checks whether export `listextension` was found.
 #[inline]
