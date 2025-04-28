@@ -21,7 +21,7 @@ use std::{
     },
 };
 use windows::{
-    core::Interface,
+    core::{Interface, InterfaceRef},
     Win32::{
         Foundation::HMODULE,
         Graphics::{Direct3D11::ID3D11Device, Dxgi::IDXGISwapChain},
@@ -148,15 +148,12 @@ pub fn d3d_version() -> u32 {
 }
 
 /// DirectX 11 swap chain.
-pub static DXGI_SWAP_CHAIN: OnceLock<Share<*mut c_void>> = OnceLock::new();
+pub static DXGI_SWAP_CHAIN: OnceLock<Share<InterfaceRef<'static, IDXGISwapChain>>> = OnceLock::new();
 
 /// Returns the DirectX swap chain, if available.
 #[inline]
-pub fn dxgi_swap_chain() -> Option<&'static IDXGISwapChain> {
-    DXGI_SWAP_CHAIN.get().map(|share| {
-        unsafe { IDXGISwapChain::from_raw_borrowed(&share.0) }
-            .expect("invalid swap chain")
-    })
+pub fn dxgi_swap_chain() -> Option<InterfaceRef<'static, IDXGISwapChain>> {
+    DXGI_SWAP_CHAIN.get().map(|&Share(id3d)| id3d)
 }
 
 /// Returns the DirectX 11 device, if available.
@@ -185,7 +182,7 @@ pub unsafe fn init_dxgi(id3d: *const c_void, d3d_version: u32, name: &'static st
                 }
             }
 
-            DXGI_SWAP_CHAIN.get_or_init(|| Share(id3d.as_ptr()));
+            DXGI_SWAP_CHAIN.get_or_init(|| Share(InterfaceRef::from_raw(id3d)));
         }
     }
 }
