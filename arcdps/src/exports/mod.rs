@@ -8,12 +8,14 @@ pub mod raw;
 pub use self::has::*;
 
 use crate::{
+    callbacks::ArcDpsExport,
     evtc::{Event, Profession},
     globals::ArcGlobals,
     imgui::sys::ImVec4,
 };
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::{
+    cell::Cell,
     ffi::{CString, NulError, OsString},
     mem::MaybeUninit,
     ops::RangeInclusive,
@@ -391,3 +393,67 @@ pub fn remove_extension(sig: u32) -> Option<HMODULE> {
 
 #[deprecated = "renamed, see remove_extension"]
 pub use remove_extension as free_extension;
+
+/// Enumerates loaded ArcDPS extensions.
+///
+/// # Safety
+///
+/// This function is not reentrant and will panic if called again from `F`.
+/// ArcDPS makes no guarantees about the state of the extensions returned,
+/// and access is mostly unsynchronized.
+///
+/// # Examples
+/// ```no_run
+/// use std::collections::BTreeMap;
+/// use windows::Win32::Foundation::HMODULE;
+/// use arcdps::exports;
+///
+/// # fn foo() {
+/// let mut extensions: BTreeMap<u32, HMODULE> = Default::default();
+/// exports::list_extension(&mut |export| if export.sig != 0 {
+///     extensions.insert(export.sig, HMODULE(export.size as *mut _));
+/// });
+/// for (&sig, module) in &extensions {
+///     if ext.is_invalid() {
+///         println!("{sig} not loaded");
+///         continue
+///     }
+///     println!("{module:?}");
+/// }
+/// # }
+/// ```
+pub fn list_extension<F>(f: &mut F) where
+    F: for<'x> FnMut(&'x ArcDpsExport),
+{
+    thread_local! {
+        static LIST_EXTENSION_CB: Cell<Option<*mut dyn FnMut(&ArcDpsExport)>> = Cell::new(None);
+    }
+
+    unsafe extern "C" fn list_extension_cb(export: *const ArcDpsExport) {
+        match LIST_EXTENSION_CB.get() {
+            Some(cb) => (*cb)(&*export),
+            None => {
+                // XXX: should never happen...
+            },
+        }
+    }
+
+    struct ListExtensionsGuard;
+
+    impl Drop for ListExtensionsGuard {
+        fn drop(&mut self) {
+            let _cb = LIST_EXTENSION_CB.take();
+            debug_assert!(_cb.is_some());
+        }
+    }
+
+    assert!(LIST_EXTENSION_CB.get().is_none(), "list_extension re-entered");
+    let _guard = ListExtensionsGuard;
+
+    unsafe {
+        let fmut = f as &mut dyn FnMut(&ArcDpsExport);
+        let cb: *mut dyn FnMut(&ArcDpsExport) = fmut as *mut (dyn FnMut(&ArcDpsExport) + '_) as *mut (dyn FnMut(&ArcDpsExport) + 'static);
+        LIST_EXTENSION_CB.set(Some(cb));
+        raw::list_extension(list_extension_cb as *const _);
+    }
+}
