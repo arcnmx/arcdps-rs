@@ -77,7 +77,7 @@ mod globals;
 mod panic;
 mod util;
 
-#[cfg(features = "export")]
+#[cfg(feature = "export")]
 pub use arcdps_codegen::export;
 pub use arcdps_imgui as imgui;
 pub use evtc::{
