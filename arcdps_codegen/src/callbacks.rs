@@ -50,10 +50,9 @@ impl ArcDpsGen {
 
                 #[no_mangle]
                 pub unsafe extern #SYSTEM_ABI fn get_update_url() -> *const ::std::primitive::u16 {
-                    static mut URL: ::arcdps::__macro::Share<::std::cell::UnsafeCell<::std::vec::Vec<::std::primitive::u16>>> = ::arcdps::__macro::Share(::std::cell::UnsafeCell::new(::std::vec::Vec::new()));
+                    static URL: ::arcdps::__macro::Share<::std::cell::UnsafeCell<::std::vec::Vec<::std::primitive::u16>>> = ::arcdps::__macro::Share(::std::cell::UnsafeCell::new(::std::vec::Vec::new()));
 
                     if let ::std::option::Option::Some(url) = self::__UPDATE_URL() {
-                        let buf = ::std::ptr::addr_of_mut!(URL);
                         *URL.0.get() = ::arcdps::__macro::str_to_wide(url);
                         (&*URL.0.get()).as_ptr()
                     } else {
