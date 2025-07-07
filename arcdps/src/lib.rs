@@ -287,7 +287,7 @@ pub struct SupportedFields {
 pub mod __macro {
     pub use crate::{
         globals::{FreeFn, MallocFn},
-        util::{str_from_cstr, str_to_wide, strip_account_prefix},
+        util::{str_from_cstr, str_to_wide, strip_account_prefix, Share},
     };
     pub use std::os::raw::{c_char, c_void};
     pub use windows::Win32::{

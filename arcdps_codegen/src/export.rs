@@ -77,7 +77,7 @@ impl ArcDpsGen {
 
             extern #C_ABI fn __load() -> *const ::arcdps::callbacks::ArcDpsExport {
                 /// ArcDPS export struct with error information.
-                static mut EXPORT_ERROR: ::arcdps::callbacks::ArcDpsExport = ::arcdps::callbacks::ArcDpsExport {
+                static EXPORT_ERROR: ::arcdps::__macro::Share<::std::cell::UnsafeCell<::arcdps::callbacks::ArcDpsExport>> = ::arcdps::__macro::Share(::std::cell::UnsafeCell::new(::arcdps::callbacks::ArcDpsExport {
                     size: 0,
                     sig: 0,
                     imgui_version: 18000,
@@ -90,19 +90,19 @@ impl ArcDpsGen {
                     options_windows: ::std::option::Option::None,
                     wnd_filter: ::std::option::Option::None,
                     wnd_nofilter: ::std::option::Option::None,
-                };
-                static mut ERROR_STRING: ::std::string::String = ::std::string::String::new();
+                }));
+                static ERROR_STRING: ::arcdps::__macro::Share<::std::cell::UnsafeCell<::std::string::String>> = ::arcdps::__macro::Share(::std::cell::UnsafeCell::new(::std::string::String::new()));
 
                 let result: ::std::result::Result<(), ::std::string::String> = #init;
                 match result {
                     ::std::result::Result::Err(err) if err.is_empty() => unsafe {
-                        EXPORT_ERROR.size = 0;
-                        &EXPORT_ERROR
+                        (&mut *EXPORT_ERROR.0.get()).size = 0;
+                        EXPORT_ERROR.0.get() as *const _
                     },
                     ::std::result::Result::Err(err) => unsafe {
-                        ERROR_STRING = err + "\0";
-                        EXPORT_ERROR.size = ERROR_STRING.as_ptr() as _;
-                        &EXPORT_ERROR
+                        *ERROR_STRING.0.get() = err + "\0";
+                        (&mut *EXPORT_ERROR.0.get()).size = (&*ERROR_STRING.0.get()).as_ptr() as _;
+                        EXPORT_ERROR.0.get() as *const _
                     },
                     _ => &self::__EXPORT,
                 }
