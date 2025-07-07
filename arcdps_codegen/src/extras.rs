@@ -95,7 +95,7 @@ impl ExtrasGen {
             let span = syn::Error::new_spanned(raw, "").span();
             (
                 quote_spanned! {span=>
-                    const _EXTRAS_INIT: ::arcdps::extras::callbacks::RawExtrasSubscriberInit = #raw;
+                    const __EXTRAS_INIT: ::arcdps::extras::callbacks::RawExtrasSubscriberInit = #raw;
 
                 },
                 quote_spanned! {span=>
