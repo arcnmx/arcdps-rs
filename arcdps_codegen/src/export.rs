@@ -94,14 +94,17 @@ impl ArcDpsGen {
                 static mut ERROR_STRING: ::std::string::String = ::std::string::String::new();
 
                 let result: ::std::result::Result<(), ::std::string::String> = #init;
-                if let ::std::result::Result::Err(err) = result {
-                    unsafe {
+                match result {
+                    ::std::result::Result::Err(err) if err.is_empty() => unsafe {
+                        EXPORT_ERROR.size = 0;
+                        &EXPORT_ERROR
+                    },
+                    ::std::result::Result::Err(err) => unsafe {
                         ERROR_STRING = err + "\0";
                         EXPORT_ERROR.size = ERROR_STRING.as_ptr() as _;
                         &EXPORT_ERROR
-                    }
-                } else {
-                    &self::__EXPORT
+                    },
+                    _ => &self::__EXPORT,
                 }
             }
 
